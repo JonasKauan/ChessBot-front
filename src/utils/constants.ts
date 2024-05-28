@@ -1,17 +1,9 @@
-
-export interface Piece {
-    image: string
-    position: Position
-    type: PieceType
-    color: Color
-    enPassant?: boolean,
-    possibleMoves?: Position[] 
-}
+import { Position } from "../models"
+import { Piece } from "../models/Piece"
 
 export interface Move{
-    previousPosition: Position
-    actualPosition: Position
     piece: Piece
+    desiredPosition: Position
 }
 
 export enum PieceType{
@@ -23,16 +15,7 @@ export enum PieceType{
     KING = 'king'
 }
 
-export interface Position {
-    row: number,
-    column: number
-}
-
 export enum Color{
     WHITE = 'w',
     BLACK = 'b'
-}
-
-export const isSamePosition = (firstPosition: Position, secondPosition: Position): boolean => {
-    return firstPosition.row === secondPosition.row && firstPosition.column === secondPosition.column;
 }

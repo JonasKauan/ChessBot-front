@@ -1,8 +1,10 @@
 import './Chessboard.css'
 import { Tile } from '../Tile/Tile';
 import { useRef, useState } from 'react';
-import { Piece, Position, Move, isSamePosition } from '../../utils/constants'
+import { Move } from '../../utils/constants'
 import { getPieceFromBoard } from '../../utils/rules/GeneralRules';
+import { Piece } from '../../models/Piece';
+import { Position } from '../../models';
 
 const GRID_SIZE = 62.5;
 
@@ -27,10 +29,10 @@ export const Chessboard = ({updatePossibleMoves, playMove, pieces}: Props) => {
 
         if (element.classList.contains('chess-piece') && chessboard) {
 
-            setGrabPosition({
-                row: Math.abs(Math.ceil((e.clientY - chessboard.offsetTop - GRID_SIZE * 8) / GRID_SIZE)),
-                column: Math.floor((e.clientX - chessboard.offsetLeft) / GRID_SIZE)
-            });
+            setGrabPosition(new Position(
+                Math.floor((e.clientX - chessboard.offsetLeft) / GRID_SIZE),
+                Math.abs(Math.ceil((e.clientY - chessboard.offsetTop - GRID_SIZE * 8) / GRID_SIZE))
+            ));
 
             const x = e.clientX - 31.25;
             const y = e.clientY - 31.25;
@@ -81,13 +83,7 @@ export const Chessboard = ({updatePossibleMoves, playMove, pieces}: Props) => {
             const actualRow = Math.abs(Math.ceil((e.clientY - chessboard.offsetTop - GRID_SIZE * 8) / GRID_SIZE));
 
             const move: Move = {
-                previousPosition: grabPosition,
-
-                actualPosition: {
-                    row: actualRow,
-                    column: actualColumn
-                },
-
+                desiredPosition: new Position(actualColumn, actualRow),
                 piece: actualPiece
             }
 
@@ -109,20 +105,17 @@ export const Chessboard = ({updatePossibleMoves, playMove, pieces}: Props) => {
     for (let i = 7; i >= 0; i--) {
         for (let j = 0; j < 8; j++) {
 
-            const actualPosition: Position = {
-                row: i,
-                column: j
-            }
+            const actualPosition = new Position(j, i);
 
             let highlight = false;
 
             if (grabPosition) {
                 const currentPiece = movingPiece !== null
-                    ? pieces.find(p => isSamePosition(p.position, grabPosition))
+                    ? pieces.find(p => grabPosition.samePosition(p.position))
                     : undefined;
 
                 highlight = currentPiece?.possibleMoves
-                    ? currentPiece.possibleMoves.some(p => isSamePosition(p, actualPosition))
+                    ? currentPiece.possibleMoves.some(p => actualPosition.samePosition(p))
                     : false
             }
 
@@ -130,7 +123,7 @@ export const Chessboard = ({updatePossibleMoves, playMove, pieces}: Props) => {
                 <Tile
                     key={`${i},${j}`}
                     tileIndex={i + j}
-                    image={pieces.find(p => isSamePosition(p.position, actualPosition))?.image}
+                    image={pieces.find(p => actualPosition.samePosition(p.position))?.image}
                     highlight={highlight}
                 />
             )

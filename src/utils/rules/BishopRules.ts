@@ -1,28 +1,30 @@
-import { Move, Piece, Position, isSamePosition } from '../constants';
+import { Position } from '../../models';
+import { Piece } from '../../models/Piece';
+import { Move } from '../constants';
 import { isTileOccupiedByFriendlyPiece, isTileOccupiedByOpponent } from './GeneralRules';
 
 export const isBishopMoveValid = (move: Move, board: Piece[]): boolean => {
-    const rowsMoved = Math.abs(move.previousPosition.row - move.actualPosition.row);
-    const columnsMoved = Math.abs(move.previousPosition.column - move.actualPosition.column);
+    const rowsMoved = Math.abs(move.piece.position.row - move.desiredPosition.row);
+    const columnsMoved = Math.abs(move.piece.position.column - move.desiredPosition.column);
 
     if(rowsMoved !== columnsMoved) return false;
 
-    const rowDirection = move.previousPosition.row < move.actualPosition.row ? 1 : -1;
-    const columnDirection = move.previousPosition.column < move.actualPosition.column ? 1 : -1;
+    const rowDirection = move.piece.position.row < move.desiredPosition.row ? 1 : -1;
+    const columnDirection = move.piece.position.column < move.desiredPosition.column ? 1 : -1;
 
     let enemyPieceInTheWay = false;
 
     for(let i = 1; i < 8; i++){
         if(enemyPieceInTheWay) break;
 
-        const actualDiagonal: Position = {
-            row: move.previousPosition.row + rowDirection * i,
-            column: move.previousPosition.column + columnDirection * i
-        }
+        const actualDiagonal = new Position(
+            move.piece.position.column + columnDirection * i,
+            move.piece.position.row + rowDirection * i
+        )
 
         if(isTileOccupiedByFriendlyPiece(actualDiagonal, move.piece.color, board)) break;
         if(isTileOccupiedByOpponent(actualDiagonal, move.piece.color, board)) enemyPieceInTheWay = true;
-        if(isSamePosition(move.actualPosition, actualDiagonal)) return true;
+        if(actualDiagonal.samePosition(move.desiredPosition)) return true;
     }
 
     return false;
@@ -31,7 +33,7 @@ export const isBishopMoveValid = (move: Move, board: Piece[]): boolean => {
 export const getPossibleBishopMoves = (bishop: Piece, board: Piece[]): Position[] => {
     return possibleBishopMoves(bishop)
         .filter(move => isBishopMoveValid(move, board))
-        .map(move => move.actualPosition);
+        .map(move => move.desiredPosition);
 }
 
 const possibleBishopMoves = (bishop: Piece): Move[] => {
@@ -42,14 +44,12 @@ const possibleBishopMoves = (bishop: Piece): Move[] => {
     [1, -1].forEach(direction => {
         for (let i = 1; i < 8; i++) {
             possibleMoves.push({
-                previousPosition,
-                actualPosition: {column: previousPosition.column + direction * i, row: previousPosition.row + i},
+                desiredPosition: new Position(previousPosition.column + direction * i, previousPosition.row + i),
                 piece: bishop
             });
     
             possibleMoves.push({
-                previousPosition,
-                actualPosition: {column: previousPosition.column - direction * i, row: previousPosition.row - i},
+                desiredPosition: new Position(previousPosition.column - direction * i, previousPosition.row - i),
                 piece: bishop
             });
         }

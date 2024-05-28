@@ -12,7 +12,8 @@ export const Tile = ({tileIndex, image, highlight}: Props) => {
         'tile',
         tileIndex % 2 === 0 && 'black-tile',
         tileIndex % 2 !== 0 && 'white-tile',
-        highlight && 'tile-highlight'
+        highlight && 'tile-highlight',
+        image && 'chess-piece-tile'
     ].filter(Boolean).join(' ');
 
     return (

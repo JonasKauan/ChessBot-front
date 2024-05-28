@@ -1,7 +1,9 @@
-import { Color, Piece, Position, isSamePosition } from '../constants';
+import { Position } from '../../models';
+import { Piece } from '../../models/Piece';
+import { Color } from '../constants';
 
 export const getPieceFromBoard = (position: Position, board: Piece[]) =>{
-    return board.find(p => isSamePosition(p.position, position));
+    return board.find(p => position.samePosition(p.position));
 }
 
 export const isEmptyTile = (position: Position, board: Piece[]): boolean => {

@@ -1,41 +1,42 @@
-import { Move, Piece, Position, isSamePosition } from "../constants";
+import { Piece, Position } from "../../models";
+import { Move } from "../constants";
 import { isTileOccupiedByFriendlyPiece, isTileOccupiedByOpponent } from "./GeneralRules";
 
 export const isRookMoveValid = (move: Move, board: Piece[]): boolean => {
     
-    const rowsMoved = Math.abs(move.previousPosition.row - move.actualPosition.row);
-    const columnsMoved = Math.abs(move.previousPosition.column - move.actualPosition.column);
+    const rowsMoved = Math.abs(move.piece.position.row - move.desiredPosition.row);
+    const columnsMoved = Math.abs(move.piece.position.column - move.desiredPosition.column);
 
     if(rowsMoved === columnsMoved) return false;
 
-    const rowDirection = move.previousPosition.row === move.actualPosition.row 
+    const rowDirection = move.piece.position.row === move.desiredPosition.row 
         ? 0 
-        : move.previousPosition.row < move.actualPosition.row ? 1 : -1;
+        : move.piece.position.row < move.desiredPosition.row ? 1 : -1;
     
-    const columnDirection = move.previousPosition.column === move.actualPosition.column 
+    const columnDirection = move.piece.position.column === move.desiredPosition.column 
         ? 0 
-        : move.previousPosition.column < move.actualPosition.column ? 1 : -1;
+        : move.piece.position.column < move.desiredPosition.column ? 1 : -1;
 
     let enemyPieceInTheWay = false;
 
     for(let i = 1; i < 8; i++){
         if(enemyPieceInTheWay) break;
 
-        const actualDirection: Position = {
-            row: move.previousPosition.row + rowDirection * i,
-            column: move.previousPosition.column + columnDirection * i
-        }
+        const actualPosition = new Position(
+            move.piece.position.column + columnDirection * i,
+            move.piece.position.row + rowDirection * i
+        );
 
-        if(isTileOccupiedByFriendlyPiece(actualDirection, move.piece.color, board)) break;
-        if(isTileOccupiedByOpponent(actualDirection, move.piece.color, board)) enemyPieceInTheWay = true;
-        if(isSamePosition(move.actualPosition, actualDirection)) return true;
+        if(isTileOccupiedByFriendlyPiece(actualPosition, move.piece.color, board)) break;
+        if(isTileOccupiedByOpponent(actualPosition, move.piece.color, board)) enemyPieceInTheWay = true;
+        if(actualPosition.samePosition(move.desiredPosition)) return true;
     }
 
     return false;
 }
 
 export const getPossibleRookMoves = (rook: Piece, board: Piece[]): Position[] => {
-    return possibleRookMoves(rook).filter(move => isRookMoveValid(move, board)).map(move => move.actualPosition);
+    return possibleRookMoves(rook).filter(move => isRookMoveValid(move, board)).map(move => move.desiredPosition);
 }
 
 const possibleRookMoves = (rook: Piece): Move[] => {
@@ -46,14 +47,12 @@ const possibleRookMoves = (rook: Piece): Move[] => {
 
         for (let i = 1; i < 8; i++) {
             possibleMoves.push({
-                previousPosition,
-                actualPosition: {column: previousPosition.column + i * direction, row: previousPosition.row},
+                desiredPosition: new Position(previousPosition.column + i * direction, previousPosition.row),
                 piece: rook
             });
 
             possibleMoves.push({
-                previousPosition,
-                actualPosition: {column: previousPosition.column, row: previousPosition.row + i * direction},
+                desiredPosition: new Position(previousPosition.column, previousPosition.row + i * direction),
                 piece: rook
             });
         }

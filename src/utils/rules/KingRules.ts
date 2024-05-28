@@ -1,9 +1,11 @@
-import { Move, Piece, Position } from '../constants';
+import { Position } from '../../models';
+import { Piece } from '../../models/Piece';
+import { Move } from '../constants';
 import { isTileOccupiedByFriendlyPiece } from './GeneralRules';
 
 export const isKingMoveValid = (move: Move, board: Piece[]): boolean => {
-    const rowsMoved = Math.abs(move.previousPosition.row - move.actualPosition.row);
-    const columnsMoved = Math.abs(move.previousPosition.column - move.actualPosition.column);
+    const rowsMoved = Math.abs(move.piece.position.row - move.desiredPosition.row);
+    const columnsMoved = Math.abs(move.piece.position.column - move.desiredPosition.column);
 
     const validMove = (
         rowsMoved === 1 &&
@@ -17,11 +19,11 @@ export const isKingMoveValid = (move: Move, board: Piece[]): boolean => {
         rowsMoved === columnsMoved
     );
 
-    return validMove && !isTileOccupiedByFriendlyPiece(move.actualPosition, move.piece.color, board);
+    return validMove && !isTileOccupiedByFriendlyPiece(move.desiredPosition, move.piece.color, board);
 }
 
 export const getPossibleKingMoves = (king: Piece, board: Piece[]): Position[] => {
-    return possibleKingMoves(king).filter(move => isKingMoveValid(move, board)).map(move => move.actualPosition);
+    return possibleKingMoves(king).filter(move => isKingMoveValid(move, board)).map(move => move.desiredPosition);
 }
 
 const possibleKingMoves = (king: Piece): Move[] => {
@@ -30,26 +32,22 @@ const possibleKingMoves = (king: Piece): Move[] => {
 
     [1, -1].forEach(direction => {
         possibleMoves.push({
-            previousPosition,
-            actualPosition: {column: previousPosition.column + direction, row: previousPosition.row + direction},
+            desiredPosition: new Position(previousPosition.column + direction, previousPosition.row + direction),
             piece: king
         });
 
         possibleMoves.push({
-            previousPosition,
-            actualPosition: {column: previousPosition.column + direction, row: previousPosition.row},
+            desiredPosition: new Position(previousPosition.column + direction, previousPosition.row),
             piece: king
         });
 
         possibleMoves.push({
-            previousPosition,
-            actualPosition: {column: previousPosition.column, row: previousPosition.row + direction},
+            desiredPosition: new Position(previousPosition.column, previousPosition.row + direction),
             piece: king
         });
 
         possibleMoves.push({
-            previousPosition,
-            actualPosition: {column: previousPosition.column - direction, row: previousPosition.row + direction},
+            desiredPosition: new Position(previousPosition.column - direction, previousPosition.row + direction),
             piece: king
         });
         

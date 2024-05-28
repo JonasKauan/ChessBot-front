@@ -1,31 +1,26 @@
-import { Piece, PieceType, Color } from './constants'
+import { Position, Piece } from '../models';
+import { PieceType, Color } from './constants'
 
 const initialPieces: Piece[] = [];
 
 Object.values(Color).forEach(color => {
     const row = color === Color.BLACK ? 7 : 0
 
-    initialPieces.push({image: `assets/images/rook_${color}.png`, position:{column: 0, row}, type: PieceType.ROOK, color})
-    initialPieces.push({image: `assets/images/knight_${color}.png`, position:{column: 1, row}, type: PieceType.KNIGHT, color})
-    initialPieces.push({image: `assets/images/bishop_${color}.png`, position:{column: 2, row}, type: PieceType.BISHOP, color})
-    initialPieces.push({image: `assets/images/queen_${color}.png`, position:{column: 3, row}, type: PieceType.QUEEN, color})
-    initialPieces.push({image: `assets/images/king_${color}.png`, position:{column: 4, row}, type: PieceType.KING, color})
-    initialPieces.push({image: `assets/images/bishop_${color}.png`, position:{column: 5, row}, type: PieceType.BISHOP, color})
-    initialPieces.push({image: `assets/images/knight_${color}.png`, position:{column: 6, row}, type: PieceType.KNIGHT, color})
-    initialPieces.push({image: `assets/images/rook_${color}.png`, position:{column: 7, row}, type: PieceType.ROOK, color})
+    initialPieces.push(new Piece(new Position(0, row), PieceType.ROOK, color));
+    initialPieces.push(new Piece(new Position(1, row), PieceType.KNIGHT, color));
+    initialPieces.push(new Piece(new Position(2, row), PieceType.BISHOP, color));
+    initialPieces.push(new Piece(new Position(3, row), PieceType.QUEEN, color));
+    initialPieces.push(new Piece(new Position(4, row), PieceType.KING, color))
+    initialPieces.push(new Piece(new Position(5, row), PieceType.BISHOP, color))
+    initialPieces.push(new Piece(new Position(6, row), PieceType.KNIGHT, color))
+    initialPieces.push(new Piece(new Position(7, row), PieceType.ROOK, color))
 
     for(let j = 0; j < 8; j++){
-        initialPieces.push(
-            {
-                image: `assets/images/pawn_${color}.png`,
-                position: {
-                    column: j,
-                    row: color === Color.BLACK ? row - 1 : row + 1,
-                },
-                type: PieceType.PAWN,
-                color
-            }
-        )
+        initialPieces.push(new Piece(
+            new Position(j, color === Color.BLACK ? row - 1 : row + 1),
+            PieceType.PAWN,
+            color
+        ));
     }
 })
 

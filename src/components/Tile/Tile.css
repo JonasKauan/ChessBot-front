@@ -5,7 +5,7 @@
     height: 62.5px;
 }
 
-.tile .chess-piece{
+.tile .chess-piece {
     width: 62.5px;
     height: 62.5px;
     background-repeat: no-repeat;
@@ -17,6 +17,10 @@
     cursor: grab;
 }
 
+.tile .chess-piece:active{
+    cursor: grabbing;
+}
+
 .black-tile{
     background-color: #4E6E5D;
 }
@@ -25,11 +29,19 @@
     background-color: #DDD78D;
 }
 
-.tile-highlight::before{
+.tile-highlight:not(.chess-piece-tile)::before{
     content: ' ';
     width: 20px;
     height: 20px;
-    background-color: black;
     border-radius: 50%;
     background-color: rgba(0, 0, 0, .4);
+}
+
+.tile-highlight.chess-piece-tile::before{
+    position: absolute;
+    content: ' ';
+    width: 57.5px;
+    height: 57.5px;
+    border: 3px solid rgba(0, 0, 0, .4);
+    border-radius: 50%;
 }

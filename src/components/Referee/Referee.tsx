@@ -1,13 +1,23 @@
 import { useEffect, useRef, useState } from "react";
-import { Color, Move, Piece, PieceType, Position, isSamePosition } from "../../utils/constants";
+import { Color, Move, PieceType } from "../../utils/constants";
 import { Chessboard } from "../Chessboard/Chessboard";
 import initialPieces from "../../utils/initialPieces";
-import { getPossiblePawnMoves, isPawnMoveValid, isEnPassantMove } from "../../utils/rules/PawnRules";
-import { getPossibleKnightMoves, isKnightMoveValid } from "../../utils/rules/KnightRules";
-import { getPossibleBishopMoves, isBishopMoveValid } from "../../utils/rules/BishopRules";
-import { getPossibleRookMoves, isRookMoveValid } from "../../utils/rules/RookRules";
-import { getPossibleQueenMoves, isQueenMoveValid } from "../../utils/rules/QueenRules";
-import { getPossibleKingMoves, isKingMoveValid } from "../../utils/rules/KingRules";
+import { Piece, Position, Pawn } from "../../models";
+import {
+    isEnPassantMove,
+    getPossiblePawnMoves,
+    getPossibleKingMoves,
+    getPossibleQueenMoves,
+    getPossibleBishopMoves,
+    getPossibleKnightMoves,
+    getPossibleRookMoves,
+    isPawnMoveValid,
+    isKnightMoveValid,
+    isBishopMoveValid,
+    isRookMoveValid,
+    isQueenMoveValid,
+    isKingMoveValid,
+} from '../../utils/rules/index'
 
 export const Referee = () => {
     const [promotionPawn, setPromotionPawn] = useState<Piece>();
@@ -26,7 +36,6 @@ export const Referee = () => {
         });
     };
 
-
     const playMove = (move: Move): boolean => {
         if (!isValidMove(move)) return false;
 
@@ -35,30 +44,28 @@ export const Referee = () => {
         if (move.piece.type === PieceType.PAWN && isEnPassantMove(move, pieces))
             rowOffset = move.piece.color === Color.WHITE ? -1 : 1;
 
-        const capturedPiecePosition: Position = {
-            row: move.actualPosition.row + rowOffset,
-            column: move.actualPosition.column
-        }
+        const capturedPiecePosition = new Position(move.desiredPosition.column, move.desiredPosition.row + rowOffset)
 
         const updatedBoard = pieces.reduce((results, piece) => {
-            if (isSamePosition(piece.position, capturedPiecePosition)) return results;
+            if (capturedPiecePosition.samePosition(piece.position)) return results;
 
-            if (isSamePosition(piece.position, move.piece.position)) {
-                piece.enPassant = piece.type === PieceType.PAWN &&
-                 Math.abs(move.actualPosition.row - move.previousPosition.row) === 2;
+            if (piece.position.samePosition(move.piece.position)) {
 
-                piece.position.row = move.actualPosition.row;
-                piece.position.column = move.actualPosition.column;
+                if(piece.isPawn) 
+                    (piece as Pawn).enPassant = Math.abs(move.desiredPosition.row - move.piece.position.row) === 2;
+
+                piece.position.row = move.desiredPosition.row;
+                piece.position.column = move.desiredPosition.column;
+                
                 results.push(piece);
-
                 return results;
             }
 
-            if (piece.type === PieceType.PAWN) piece.enPassant = false;
+            if (piece.isPawn) (piece as Pawn).enPassant = false;
 
-            let promotionRow = piece.color === Color.WHITE ? 7 : 0;
+            const promotionRow = piece.color === Color.WHITE ? 7 : 0;
 
-            if (move.actualPosition.row === promotionRow && move.piece.type === PieceType.PAWN) {
+            if (move.desiredPosition.row === promotionRow && move.piece.isPawn) {
                 modalRef.current?.classList.remove('hidden');
                 setPromotionPawn(move.piece);
             }
@@ -99,10 +106,8 @@ export const Referee = () => {
         if (!promotionPawn) return;
 
         const updatedBoard = pieces.reduce((results, piece) => {
-            if (isSamePosition(piece.position, promotionPawn.position)) {
-                piece.type = type;
-                piece.image = `assets/images/${type}_${piece.color}.png`;
-            }
+            if (piece.position.samePosition(promotionPawn.position))
+                piece = new Piece(piece.position, type, piece.color)
 
             results.push(piece);
             return results;

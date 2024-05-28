@@ -1,28 +1,29 @@
-import { Move, Piece, Position, isSamePosition } from "../constants";
+import { Piece, Position } from "../../models";
+import { Move } from "../constants";
 import { isTileOccupiedByFriendlyPiece, isTileOccupiedByOpponent } from "./GeneralRules";
 
 export const isQueenMoveValid = (move: Move, board: Piece[]): boolean => { 
-    const rowDirection = move.previousPosition.row === move.actualPosition.row 
+    const rowDirection = move.piece.position.row === move.desiredPosition.row 
         ? 0 
-        : move.previousPosition.row < move.actualPosition.row ? 1 : -1;
+        : move.piece.position.row < move.desiredPosition.row ? 1 : -1;
     
-    const columnDirection = move.previousPosition.column === move.actualPosition.column 
+    const columnDirection = move.piece.position.column === move.desiredPosition.column 
         ? 0 
-        : move.previousPosition.column < move.actualPosition.column ? 1 : -1;
+        : move.piece.position.column < move.desiredPosition.column ? 1 : -1;
 
     let enemyPieceInTheWay = false;
 
     for(let i = 1; i < 8; i++){
         if(enemyPieceInTheWay) break;
 
-        const actualDirection: Position = {
-            row: move.previousPosition.row + rowDirection * i,
-            column: move.previousPosition.column + columnDirection * i
-        }
+        const actualDiagonal = new Position(
+            move.piece.position.column + columnDirection * i,
+            move.piece.position.row + rowDirection * i
+        )
         
-        if(isTileOccupiedByFriendlyPiece(actualDirection, move.piece.color, board)) break;
-        if(isTileOccupiedByOpponent(actualDirection, move.piece.color, board)) enemyPieceInTheWay = true;
-        if(isSamePosition(move.actualPosition, actualDirection)) return true;
+        if(isTileOccupiedByFriendlyPiece(actualDiagonal, move.piece.color, board)) break;
+        if(isTileOccupiedByOpponent(actualDiagonal, move.piece.color, board)) enemyPieceInTheWay = true;
+        if(actualDiagonal.samePosition(move.desiredPosition)) return true;
     }
 
     return false;
@@ -31,7 +32,7 @@ export const isQueenMoveValid = (move: Move, board: Piece[]): boolean => {
 export const getPossibleQueenMoves = (queen: Piece, board: Piece[]): Position[] => {
     return possibleQueenMoves(queen)
         .filter(move => isQueenMoveValid(move, board))
-        .map(move => move.actualPosition);
+        .map(move => move.desiredPosition);
 }
 
 const possibleQueenMoves = (queen: Piece): Move[] => {
@@ -41,38 +42,34 @@ const possibleQueenMoves = (queen: Piece): Move[] => {
     [1, -1].forEach(direction => {
         for(let i = 1; i < 8; i++){
             possibleMoves.push({
-                previousPosition,
-                actualPosition: {
-                    column: previousPosition.column + i * direction,
-                    row: previousPosition.row + i * direction
-                },
+                desiredPosition: new Position(
+                    previousPosition.column + i * direction,
+                    previousPosition.row + i * direction
+                ),
                 piece: queen
             });
 
             possibleMoves.push({
-                previousPosition,
-                actualPosition: {
-                    column: previousPosition.column - i * direction,
-                    row: previousPosition.row + i * direction
-                },
+                desiredPosition: new Position(
+                    previousPosition.column - i * direction,
+                    previousPosition.row + i * direction
+                ),
                 piece: queen
             });
 
             possibleMoves.push({
-                previousPosition,
-                actualPosition: {
-                    column: previousPosition.column,
-                    row: previousPosition.row + i * direction
-                },
+                desiredPosition: new Position(
+                    previousPosition.column,
+                    previousPosition.row + i * direction
+                ),
                 piece: queen
             });
 
             possibleMoves.push({
-                previousPosition,
-                actualPosition: {
-                    column: previousPosition.column + i * direction,
-                    row: previousPosition.row
-                },
+                desiredPosition: new Position(
+                    previousPosition.column + i * direction,
+                    previousPosition.row
+                ),
                 piece: queen
             });
         }
