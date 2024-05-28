@@ -11,7 +11,7 @@ export const isEnPassantMove = (move: Move, board: Piece[]): boolean =>{
     
     if(!piece || isTileOccupiedByFriendlyPiece(pawnPosition, move.piece.color, board)) return false;
 
-    return piece.isPawn && ((piece as Pawn).enPassant ?? false); 
+    return piece.isPawn && (piece as Pawn).enPassant; 
 }
 
 const isPawnCaptureValid = (move: Move, board: Piece[]): boolean =>{
