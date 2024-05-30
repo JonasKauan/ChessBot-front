@@ -2,20 +2,23 @@ import { Color, PieceType } from "../utils/constants"
 import { Position } from "./Position"
 
 export class Piece {
-    image: string
-    position: Position
-    type: PieceType
-    color: Color
-    possibleMoves?: Position[] 
+    image: string;
+    position: Position;
+    type: PieceType;
+    color: Color;
+    possibleMoves: Position[];
+    attackedSquares: Position[];
 
     constructor(position: Position, type: PieceType, color: Color){
         this.image = `/assets/images/${type}_${color}.png`;
         this.position = position;
         this.type = type;
         this.color = color;
+        this.possibleMoves = [];
+        this.attackedSquares = [];
     }
 
-    get isPawn(): boolean{
+    get isPawn(): boolean {
         return this.type === PieceType.PAWN
     }
 

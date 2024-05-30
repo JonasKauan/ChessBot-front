@@ -2,16 +2,12 @@ import { Position } from '../../models';
 import { Piece } from '../../models/Piece';
 import { Color } from '../constants';
 
-export const getPieceFromBoard = (position: Position, board: Piece[]) =>{
-    return board.find(p => position.samePosition(p.position));
+export const isEmptyTile = (desiredPosition: Position, board: Piece[]): boolean => {
+    return !board.find(piece => desiredPosition.samePosition(piece.position));
 }
 
-export const isEmptyTile = (position: Position, board: Piece[]): boolean => {
-    return !getPieceFromBoard(position, board);
-}
-
-export const isTileOccupiedByOpponent = (position: Position, color: Color, board: Piece[]): boolean => {
-    const pieceInTile = getPieceFromBoard(position, board);
+export const isTileOccupiedByOpponent = (desiredPosition: Position, color: Color, board: Piece[]): boolean => {
+    const pieceInTile = board.find(piece => desiredPosition.samePosition(piece.position));
     return pieceInTile !== undefined && pieceInTile.color !== color;
 }
 

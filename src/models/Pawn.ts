@@ -8,4 +8,8 @@ export class Pawn extends Piece{
         super(position, type, color);
         this.enPassant = false;
     }
+
+    get threatenedSquares(): Position[] {
+        return this.possibleMoves.filter(position => position.row !== this.position.row);
+    }
 }

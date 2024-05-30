@@ -1,5 +1,5 @@
-import './App.css';
 import { Referee } from './components/Referee/Referee';
+import './App.css';
 
 function App() {
   return (

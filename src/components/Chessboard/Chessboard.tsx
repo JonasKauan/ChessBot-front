@@ -1,10 +1,7 @@
 import './Chessboard.css'
 import { Tile } from '../Tile/Tile';
 import { useRef, useState } from 'react';
-import { Move } from '../../utils/constants'
-import { getPieceFromBoard } from '../../utils/rules/GeneralRules';
-import { Piece } from '../../models/Piece';
-import { Position } from '../../models';
+import { Position, Piece, Move } from '../../models';
 
 const GRID_SIZE = 62.5;
 
@@ -29,10 +26,12 @@ export const Chessboard = ({updatePossibleMoves, playMove, pieces}: Props) => {
 
         if (element.classList.contains('chess-piece') && chessboard) {
 
-            setGrabPosition(new Position(
-                Math.floor((e.clientX - chessboard.offsetLeft) / GRID_SIZE),
-                Math.abs(Math.ceil((e.clientY - chessboard.offsetTop - GRID_SIZE * 8) / GRID_SIZE))
-            ));
+            setGrabPosition(
+                new Position(
+                    Math.floor((e.clientX - chessboard.offsetLeft) / GRID_SIZE),
+                    Math.abs(Math.ceil((e.clientY - chessboard.offsetTop - GRID_SIZE * 8) / GRID_SIZE))
+                )
+            );
 
             const x = e.clientX - 31.25;
             const y = e.clientY - 31.25;
@@ -75,18 +74,14 @@ export const Chessboard = ({updatePossibleMoves, playMove, pieces}: Props) => {
         if (movingPiece && chessboard) {
             if (!grabPosition) return;
 
-            const actualPiece = getPieceFromBoard(grabPosition, pieces);
+            const actualPiece = pieces.find(piece => grabPosition.samePosition(piece.position));
 
             if (!actualPiece) return;
 
             const actualColumn = Math.floor((e.clientX - chessboard.offsetLeft) / GRID_SIZE);
             const actualRow = Math.abs(Math.ceil((e.clientY - chessboard.offsetTop - GRID_SIZE * 8) / GRID_SIZE));
 
-            const move: Move = {
-                desiredPosition: new Position(actualColumn, actualRow),
-                piece: actualPiece
-            }
-
+            const move: Move = new Move(actualPiece, new Position(actualColumn, actualRow));
             const valid = playMove(move);
 
 
@@ -97,6 +92,7 @@ export const Chessboard = ({updatePossibleMoves, playMove, pieces}: Props) => {
             }
 
             setMovingPiece(null);
+            updatePossibleMoves();
         }
     }
 

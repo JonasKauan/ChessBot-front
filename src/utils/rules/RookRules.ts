@@ -1,5 +1,5 @@
-import { Piece, Position } from "../../models";
-import { Move } from "../constants";
+import { Piece, Position, Move } from "../../models";
+import { isValidMove, possibleSlidingPieceAttacks } from "../constants";
 import { isTileOccupiedByFriendlyPiece, isTileOccupiedByOpponent } from "./GeneralRules";
 
 export const isRookMoveValid = (move: Move, board: Piece[]): boolean => {
@@ -36,7 +36,13 @@ export const isRookMoveValid = (move: Move, board: Piece[]): boolean => {
 }
 
 export const getPossibleRookMoves = (rook: Piece, board: Piece[]): Position[] => {
-    return possibleRookMoves(rook).filter(move => isRookMoveValid(move, board)).map(move => move.desiredPosition);
+    return possibleRookMoves(rook)
+        .filter(move => isValidMove(move, board))
+        .map(move => move.desiredPosition);
+}
+
+export const getAttackedRookSquares = (rook: Piece, board: Piece[]): Position[] => {
+    return possibleSlidingPieceAttacks(rook, possibleRookMoves(rook), board);
 }
 
 const possibleRookMoves = (rook: Piece): Move[] => {
@@ -46,15 +52,19 @@ const possibleRookMoves = (rook: Piece): Move[] => {
     [1, -1].forEach(direction => {
 
         for (let i = 1; i < 8; i++) {
-            possibleMoves.push({
-                desiredPosition: new Position(previousPosition.column + i * direction, previousPosition.row),
-                piece: rook
-            });
+            possibleMoves.push(
+                new Move(
+                    rook,
+                    new Position(previousPosition.column + i * direction, previousPosition.row)
+                )
+            );
 
-            possibleMoves.push({
-                desiredPosition: new Position(previousPosition.column, previousPosition.row + i * direction),
-                piece: rook
-            });
+            possibleMoves.push(
+                new Move(
+                    rook,
+                    new Position(previousPosition.column, previousPosition.row + i * direction)
+                )
+            );
         }
     });
 

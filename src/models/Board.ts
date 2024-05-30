@@ -1,11 +1,13 @@
-import { Color, Move, PieceType } from "../utils/constants";
-import { getPossibleBishopMoves, getPossibleKingMoves, getPossibleKnightMoves, getPossiblePawnMoves, getPossibleQueenMoves, getPossibleRookMoves } from "../utils/rules";
+import { Color, PieceType } from "../utils/constants";
+import { getAttackedBishopSquares, getAttackedKingSquares, getAttackedKnightSquares, getAttackedPawnSquares, getAttackedQueenSquares, getAttackedRookSquares, getPossibleBishopMoves, getPossibleKingMoves, getPossibleKnightMoves, getPossiblePawnMoves, getPossibleQueenMoves, getPossibleRookMoves } from "../utils/rules";
+import { Move } from "./Move";
 import { Pawn } from "./Pawn";
 import { Piece } from "./Piece";
 import { Position } from "./Position";
 
 export class Board {
     pieces: Piece[];
+    turns: number;
 
     constructor() {
         this.pieces = [];
@@ -17,10 +19,10 @@ export class Board {
             this.pieces.push(new Piece(new Position(1, row), PieceType.KNIGHT, color));
             this.pieces.push(new Piece(new Position(2, row), PieceType.BISHOP, color));
             this.pieces.push(new Piece(new Position(3, row), PieceType.QUEEN, color));
-            this.pieces.push(new Piece(new Position(4, row), PieceType.KING, color))
-            this.pieces.push(new Piece(new Position(5, row), PieceType.BISHOP, color))
-            this.pieces.push(new Piece(new Position(6, row), PieceType.KNIGHT, color))
-            this.pieces.push(new Piece(new Position(7, row), PieceType.ROOK, color))
+            this.pieces.push(new Piece(new Position(4, row), PieceType.KING, color));
+            this.pieces.push(new Piece(new Position(5, row), PieceType.BISHOP, color));
+            this.pieces.push(new Piece(new Position(6, row), PieceType.KNIGHT, color));
+            this.pieces.push(new Piece(new Position(7, row), PieceType.ROOK, color));
 
             for (let j = 0; j < 8; j++) {
                 this.pieces.push(new Piece(
@@ -29,12 +31,15 @@ export class Board {
                     color
                 ));
             }
-        })
+        });
+
+        this.turns = 1;
     }
 
     updatePiecesPossibleMoves() {
         for (const piece of this.pieces) {
             piece.possibleMoves = this.getValidMoves(piece);
+            piece.attackedSquares = this.getAttackedSquares(piece);
         }
     }
 
@@ -46,6 +51,17 @@ export class Board {
             case PieceType.ROOK: return getPossibleRookMoves(piece, this.pieces);
             case PieceType.QUEEN: return getPossibleQueenMoves(piece, this.pieces);
             case PieceType.KING: return getPossibleKingMoves(piece, this.pieces);
+        }
+    }
+
+    getAttackedSquares(piece: Piece){
+        switch(piece.type){
+            case PieceType.PAWN: return getAttackedPawnSquares(piece);
+            case PieceType.KNIGHT: return getAttackedKnightSquares(piece);
+            case PieceType.BISHOP: return getAttackedBishopSquares(piece, this.pieces);
+            case PieceType.ROOK: return getAttackedRookSquares(piece, this.pieces);
+            case PieceType.QUEEN: return getAttackedQueenSquares(piece, this.pieces);
+            case PieceType.KING: return getAttackedKingSquares(piece);
         }
     }
 

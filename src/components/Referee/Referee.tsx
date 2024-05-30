@@ -1,16 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { Color, Move, PieceType } from "../../utils/constants";
+import { Color, PieceType, isValidMove } from "../../utils/constants";
 import { Chessboard } from "../Chessboard/Chessboard";
-import { Piece, Position, Pawn, Board } from "../../models";
-import {
-    isEnPassantMove,
-    isPawnMoveValid,
-    isKnightMoveValid,
-    isBishopMoveValid,
-    isRookMoveValid,
-    isQueenMoveValid,
-    isKingMoveValid,
-} from '../../utils/rules/index'
+import { Piece, Board, Move } from "../../models";
+import { isEnPassantMove } from '../../utils/rules/index'
 
 export const Referee = () => {
     const [promotionPawn, setPromotionPawn] = useState<Piece>();
@@ -26,7 +18,7 @@ export const Referee = () => {
     };
 
     const playMove = (move: Move): boolean => {
-        if (!isValidMove(move)) return false;
+        if (!isValidMove(move, board.pieces)) return false;
 
         const rowOffset = move.piece.isPawn && isEnPassantMove(move, board.pieces)
             ? move.piece.color === Color.WHITE ? -1 : 1
@@ -44,18 +36,6 @@ export const Referee = () => {
 
         return true;
     }
-
-    const isValidMove = (move: Move): boolean => {
-        switch (move.piece.type) {
-            case PieceType.PAWN: return isPawnMoveValid(move, board.pieces);
-            case PieceType.KNIGHT: return isKnightMoveValid(move, board.pieces);
-            case PieceType.BISHOP: return isBishopMoveValid(move, board.pieces);
-            case PieceType.ROOK: return isRookMoveValid(move, board.pieces);
-            case PieceType.QUEEN: return isQueenMoveValid(move, board.pieces)
-            case PieceType.KING: return isKingMoveValid(move, board.pieces);
-        }
-    }
-
 
     const promotePawn = (type: PieceType) => {
         if (!promotionPawn) return;

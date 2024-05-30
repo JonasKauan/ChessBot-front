@@ -1,6 +1,5 @@
-import { Position } from '../../models';
-import { Piece } from '../../models/Piece';
-import { Move } from '../constants';
+import { Position, Piece, Move } from '../../models';
+import { isValidMove, possibleSlidingPieceAttacks } from '../constants';
 import { isTileOccupiedByFriendlyPiece, isTileOccupiedByOpponent } from './GeneralRules';
 
 export const isBishopMoveValid = (move: Move, board: Piece[]): boolean => {
@@ -32,8 +31,12 @@ export const isBishopMoveValid = (move: Move, board: Piece[]): boolean => {
 
 export const getPossibleBishopMoves = (bishop: Piece, board: Piece[]): Position[] => {
     return possibleBishopMoves(bishop)
-        .filter(move => isBishopMoveValid(move, board))
+        .filter(move => isValidMove(move, board))
         .map(move => move.desiredPosition);
+}
+
+export const getAttackedBishopSquares = (bishop: Piece, board: Piece[]): Position[] => {
+    return possibleSlidingPieceAttacks(bishop, possibleBishopMoves(bishop), board);
 }
 
 const possibleBishopMoves = (bishop: Piece): Move[] => {
@@ -43,15 +46,20 @@ const possibleBishopMoves = (bishop: Piece): Move[] => {
 
     [1, -1].forEach(direction => {
         for (let i = 1; i < 8; i++) {
-            possibleMoves.push({
-                desiredPosition: new Position(previousPosition.column + direction * i, previousPosition.row + i),
-                piece: bishop
-            });
+
+            possibleMoves.push(
+                new Move(
+                    bishop,
+                    new Position(previousPosition.column + direction * i, previousPosition.row + i)
+                )
+            );
     
-            possibleMoves.push({
-                desiredPosition: new Position(previousPosition.column - direction * i, previousPosition.row - i),
-                piece: bishop
-            });
+            possibleMoves.push(
+                new Move(
+                    bishop,
+                    new Position(previousPosition.column - direction * i, previousPosition.row - i)
+                )
+            );
         }
     })
 

@@ -1,13 +1,13 @@
-import { Pawn, Piece, Position } from "../../models";
-import { Color, Move } from "../constants";
-import { getPieceFromBoard, isEmptyTile, isTileOccupiedByFriendlyPiece, isTileOccupiedByOpponent } from "./GeneralRules";
+import { Pawn, Piece, Position, Move } from "../../models";
+import { Color, isValidMove } from "../constants";
+import { isEmptyTile, isTileOccupiedByFriendlyPiece, isTileOccupiedByOpponent } from "./GeneralRules";
 
 export const isEnPassantMove = (move: Move, board: Piece[]): boolean =>{
     const rowOffset = move.piece.color === Color.WHITE ? -1 : 1;
 
     const pawnPosition = new Position(move.desiredPosition.column, move.desiredPosition.row + rowOffset)
 
-    const piece = getPieceFromBoard(pawnPosition, board);
+    const piece = board.find(piece => pawnPosition.samePosition(piece.position));
     
     if(!piece || isTileOccupiedByFriendlyPiece(pawnPosition, move.piece.color, board)) return false;
 
@@ -47,7 +47,13 @@ export const isPawnMoveValid = (move: Move, board: Piece[]) =>{
 
 export const getPossiblePawnMoves = (pawn: Piece, board: Piece[]): Position[] => {
     return possiblePawnMoves(pawn)
-        .filter(move => isPawnMoveValid(move, board))
+        .filter(move => isValidMove(move, board))
+        .map(move => move.desiredPosition);
+}
+
+export const getAttackedPawnSquares = (pawn: Piece): Position[] => {
+    return possiblePawnMoves(pawn)
+        .filter(move => move.isWithinBounds && move.desiredPosition.column !== pawn.position.column)
         .map(move => move.desiredPosition);
 }
 
@@ -56,21 +62,9 @@ const possiblePawnMoves = (pawn: Piece): Move[] => {
     const previousPosition: Position = pawn.position;  
 
     return [
-        {
-            desiredPosition: new Position(previousPosition.column, previousPosition.row + rowOffset),
-            piece: pawn
-        },
-        {
-            desiredPosition: new Position(previousPosition.column, previousPosition.row + rowOffset * 2),
-            piece: pawn
-        },
-        {
-            desiredPosition: new Position(previousPosition.column + rowOffset, previousPosition.row + rowOffset),
-            piece: pawn
-        },
-        {
-            desiredPosition: new Position(previousPosition.column - rowOffset, previousPosition.row + rowOffset),
-            piece: pawn
-        }
+        new Move(pawn, new Position(previousPosition.column, previousPosition.row + rowOffset)),
+        new Move(pawn, new Position(previousPosition.column, previousPosition.row + rowOffset * 2)),
+        new Move(pawn, new Position(previousPosition.column + rowOffset, previousPosition.row + rowOffset)),
+        new Move(pawn, new Position(previousPosition.column - rowOffset, previousPosition.row + rowOffset))
     ];
 }

@@ -1,13 +1,12 @@
-import { Position } from '../../models';
-import { Piece } from '../../models/Piece';
-import { Move } from '../constants';
+import { Position, Piece, Move } from '../../models';
+import { Color, isTileThreatened, isValidMove } from '../constants';
 import { isTileOccupiedByFriendlyPiece } from './GeneralRules';
 
 export const isKingMoveValid = (move: Move, board: Piece[]): boolean => {
     const rowsMoved = Math.abs(move.piece.position.row - move.desiredPosition.row);
     const columnsMoved = Math.abs(move.piece.position.column - move.desiredPosition.column);
 
-    const validMove = (
+    const validMovePattern = (
         rowsMoved === 1 &&
         columnsMoved === 0
     ) ||
@@ -15,15 +14,23 @@ export const isKingMoveValid = (move: Move, board: Piece[]): boolean => {
         rowsMoved === 0 &&
         columnsMoved === 1
     ) ||
-    (
-        rowsMoved === columnsMoved
-    );
-
-    return validMove && !isTileOccupiedByFriendlyPiece(move.desiredPosition, move.piece.color, board);
+    (rowsMoved === columnsMoved);
+    
+    const emptyOrOccupiedByEnemy = !isTileOccupiedByFriendlyPiece(move.desiredPosition, move.piece.color, board);
+    const threatenedSquare = isTileThreatened(move.desiredPosition, move.piece.color, board);
+    return validMovePattern && emptyOrOccupiedByEnemy && !threatenedSquare;
 }
 
 export const getPossibleKingMoves = (king: Piece, board: Piece[]): Position[] => {
-    return possibleKingMoves(king).filter(move => isKingMoveValid(move, board)).map(move => move.desiredPosition);
+    return possibleKingMoves(king)
+        .filter(move => isValidMove(move, board))
+        .map(move => move.desiredPosition);
+}
+
+export const getAttackedKingSquares = (king: Piece): Position[] => {
+    return possibleKingMoves(king)
+        .filter(move => move.isWithinBounds)
+        .map(move => move.desiredPosition);
 }
 
 const possibleKingMoves = (king: Piece): Move[] => {
@@ -31,25 +38,34 @@ const possibleKingMoves = (king: Piece): Move[] => {
     const previousPosition = king.position;
 
     [1, -1].forEach(direction => {
-        possibleMoves.push({
-            desiredPosition: new Position(previousPosition.column + direction, previousPosition.row + direction),
-            piece: king
-        });
 
-        possibleMoves.push({
-            desiredPosition: new Position(previousPosition.column + direction, previousPosition.row),
-            piece: king
-        });
+        possibleMoves.push(
+            new Move(
+                king,
+                new Position(previousPosition.column + direction, previousPosition.row + direction)
+            )
+        );
 
-        possibleMoves.push({
-            desiredPosition: new Position(previousPosition.column, previousPosition.row + direction),
-            piece: king
-        });
+        possibleMoves.push(
+            new Move(
+                king,
+                new Position(previousPosition.column + direction, previousPosition.row)
+            )
+        );
 
-        possibleMoves.push({
-            desiredPosition: new Position(previousPosition.column - direction, previousPosition.row + direction),
-            piece: king
-        });
+        possibleMoves.push(
+            new Move(
+                king,
+                new Position(previousPosition.column, previousPosition.row + direction)
+            )
+        );
+
+        possibleMoves.push(
+            new Move(
+                king,
+                new Position(previousPosition.column - direction, previousPosition.row + direction)
+            )
+        );
         
     })
 
