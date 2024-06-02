@@ -11,4 +11,8 @@ export class Position {
         return this.row === secondPosition.row &&
             this.column === secondPosition.column;
     }
+
+    clone(): Position {
+        return new Position(this.column, this.row);
+    }
 }

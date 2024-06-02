@@ -1,4 +1,4 @@
-import { Position, Piece, Move } from '../../models';
+import { Position, Piece, Move, Board } from '../../models';
 import { isValidMove, possibleSlidingPieceAttacks } from '../constants';
 import { isTileOccupiedByFriendlyPiece, isTileOccupiedByOpponent } from './GeneralRules';
 
@@ -29,7 +29,7 @@ export const isBishopMoveValid = (move: Move, board: Piece[]): boolean => {
     return false;
 }
 
-export const getPossibleBishopMoves = (bishop: Piece, board: Piece[]): Position[] => {
+export const getPossibleBishopMoves = (bishop: Piece, board: Board): Position[] => {
     return possibleBishopMoves(bishop)
         .filter(move => isValidMove(move, board))
         .map(move => move.desiredPosition);

@@ -4,12 +4,8 @@ import { Piece, Position } from "./";
 export class Pawn extends Piece{
     enPassant: boolean
 
-    constructor(position: Position, type: PieceType, color: Color){
-        super(position, type, color);
+    constructor(position: Position, color: Color, possibleMoves: Position[], attackedSquares: Position[]){
+        super(position, PieceType.PAWN, color, possibleMoves, attackedSquares);
         this.enPassant = false;
-    }
-
-    get threatenedSquares(): Position[] {
-        return this.possibleMoves.filter(position => position.row !== this.position.row);
     }
 }

@@ -9,31 +9,13 @@ export class Board {
     pieces: Piece[];
     turns: number;
 
-    constructor() {
-        this.pieces = [];
+    constructor(pieces: Piece[], turns: number) {
+        this.pieces = pieces;
+        this.turns = turns;
+    }
 
-        Object.values(Color).forEach(color => {
-            const row = color === Color.BLACK ? 7 : 0
-
-            this.pieces.push(new Piece(new Position(0, row), PieceType.ROOK, color));
-            this.pieces.push(new Piece(new Position(1, row), PieceType.KNIGHT, color));
-            this.pieces.push(new Piece(new Position(2, row), PieceType.BISHOP, color));
-            this.pieces.push(new Piece(new Position(3, row), PieceType.QUEEN, color));
-            this.pieces.push(new Piece(new Position(4, row), PieceType.KING, color));
-            this.pieces.push(new Piece(new Position(5, row), PieceType.BISHOP, color));
-            this.pieces.push(new Piece(new Position(6, row), PieceType.KNIGHT, color));
-            this.pieces.push(new Piece(new Position(7, row), PieceType.ROOK, color));
-
-            for (let j = 0; j < 8; j++) {
-                this.pieces.push(new Piece(
-                    new Position(j, color === Color.BLACK ? row - 1 : row + 1),
-                    PieceType.PAWN,
-                    color
-                ));
-            }
-        });
-
-        this.turns = 1;
+    get currentColorToMove(): Color {
+        return this.turns % 2 === 0 ? Color.BLACK : Color.WHITE;
     }
 
     updatePiecesPossibleMoves() {
@@ -45,17 +27,17 @@ export class Board {
 
     getValidMoves(piece: Piece): Position[] {
         switch (piece.type) {
-            case PieceType.PAWN: return getPossiblePawnMoves(piece, this.pieces);
-            case PieceType.KNIGHT: return getPossibleKnightMoves(piece, this.pieces);
-            case PieceType.BISHOP: return getPossibleBishopMoves(piece, this.pieces);
-            case PieceType.ROOK: return getPossibleRookMoves(piece, this.pieces);
-            case PieceType.QUEEN: return getPossibleQueenMoves(piece, this.pieces);
-            case PieceType.KING: return getPossibleKingMoves(piece, this.pieces);
+            case PieceType.PAWN: return getPossiblePawnMoves(piece, this);
+            case PieceType.KNIGHT: return getPossibleKnightMoves(piece, this);
+            case PieceType.BISHOP: return getPossibleBishopMoves(piece, this);
+            case PieceType.ROOK: return getPossibleRookMoves(piece, this);
+            case PieceType.QUEEN: return getPossibleQueenMoves(piece, this);
+            case PieceType.KING: return getPossibleKingMoves(piece, this);
         }
     }
 
-    getAttackedSquares(piece: Piece){
-        switch(piece.type){
+    getAttackedSquares(piece: Piece) {
+        switch (piece.type) {
             case PieceType.PAWN: return getAttackedPawnSquares(piece);
             case PieceType.KNIGHT: return getAttackedKnightSquares(piece);
             case PieceType.BISHOP: return getAttackedBishopSquares(piece, this.pieces);
@@ -66,7 +48,10 @@ export class Board {
     }
 
     updateBoardOnMove(rowOffset: number, move: Move) {
-        const capturedPiecePosition = new Position(move.desiredPosition.column, move.desiredPosition.row + rowOffset)
+        const capturedPiecePosition = new Position(
+            move.desiredPosition.column,
+            move.desiredPosition.row + rowOffset
+        )
 
         this.pieces = this.pieces.reduce((results, piece) => {
             if (capturedPiecePosition.samePosition(piece.position)) return results;
@@ -89,5 +74,38 @@ export class Board {
             return results;
 
         }, [] as Piece[]);
+
+        this.turns++;
+    }
+
+    flipBoard() {
+        this.pieces = this.pieces.map(piece => {
+            return new Piece(
+                new Position(Math.abs(piece.position.column - 7), Math.abs(piece.position.row - 7)),
+                piece.type,
+                piece.color,
+                this.getValidMoves(piece),
+                this.getAttackedSquares(piece)
+            );
+        });
+    }
+
+    toFenString() {
+        let fenString = '';
+
+        for (let i = 7; i >= 0; i--) {
+            for (let j = 0; j < 8; j++) {
+
+            }
+        }
+
+        return fenString;
+    }
+
+    copy(): Board {
+        return new Board(
+            this.pieces.map(piece => piece.clone()),
+            this.turns
+        );
     }
 }

@@ -2,16 +2,18 @@ import './Chessboard.css'
 import { Tile } from '../Tile/Tile';
 import { useRef, useState } from 'react';
 import { Position, Piece, Move } from '../../models';
+import { log } from 'console';
 
 const GRID_SIZE = 62.5;
 
 interface Props {
     updatePossibleMoves: () => void;
     playMove: (move: Move) => boolean;
+    flipBoard: () => void
     pieces: Piece[];
 }
 
-export const Chessboard = ({updatePossibleMoves, playMove, pieces}: Props) => {
+export const Chessboard = ({updatePossibleMoves, playMove, pieces, flipBoard}: Props) => {
     const [movingPiece, setMovingPiece] = useState<HTMLElement | null>(null)
     const [grabPosition, setGrabPosition] = useState<Position | null>(null);
 
@@ -75,32 +77,29 @@ export const Chessboard = ({updatePossibleMoves, playMove, pieces}: Props) => {
             if (!grabPosition) return;
 
             const actualPiece = pieces.find(piece => grabPosition.samePosition(piece.position));
-
+            
             if (!actualPiece) return;
-
+            
             const actualColumn = Math.floor((e.clientX - chessboard.offsetLeft) / GRID_SIZE);
             const actualRow = Math.abs(Math.ceil((e.clientY - chessboard.offsetTop - GRID_SIZE * 8) / GRID_SIZE));
 
             const move: Move = new Move(actualPiece, new Position(actualColumn, actualRow));
             const valid = playMove(move);
 
-
-            if(!valid){
-                movingPiece.style.position = 'relative';
-                movingPiece.style.removeProperty('top');
-                movingPiece.style.removeProperty('left');
-            }
+            movingPiece.style.position = 'relative';
+            movingPiece.style.removeProperty('top');
+            movingPiece.style.removeProperty('left');
 
             setMovingPiece(null);
+            if(valid) flipBoard();
             updatePossibleMoves();
-        }
+        }  
     }
-
+    
     const board = [];
-
+        
     for (let i = 7; i >= 0; i--) {
         for (let j = 0; j < 8; j++) {
-
             const actualPosition = new Position(j, i);
 
             let highlight = false;

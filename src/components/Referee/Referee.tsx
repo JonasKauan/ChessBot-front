@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-import { Color, PieceType, isValidMove } from "../../utils/constants";
+import { Color, PieceType, isValidMove, parseFenToBoard } from "../../utils/constants";
 import { Chessboard } from "../Chessboard/Chessboard";
 import { Piece, Board, Move } from "../../models";
 import { isEnPassantMove } from '../../utils/rules/index'
 
+const INITIAL_POSITION_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+
 export const Referee = () => {
+    const [board, setBoard] = useState<Board>(parseFenToBoard(INITIAL_POSITION_FEN, 1));
     const [promotionPawn, setPromotionPawn] = useState<Piece>();
-    const [board, setBoard] = useState<Board>(new Board());
-    const [pieces, setPieces] = useState<Piece[]>(board.pieces);
 
     const modalRef = useRef<HTMLDivElement>(null);
 
@@ -17,19 +18,30 @@ export const Referee = () => {
         board.updatePiecesPossibleMoves();
     };
 
-    const playMove = (move: Move): boolean => {
-        if (!isValidMove(move, board.pieces)) return false;
+    const flipBoard = () => {
+        board.flipBoard();
 
-        const rowOffset = move.piece.isPawn && isEnPassantMove(move, board.pieces)
-            ? move.piece.color === Color.WHITE ? -1 : 1
-            : 0
+        setBoard(previousBoard => {
+            return board.copy();
+        });
+    }
+
+    const playMove = (move: Move): boolean => {
+        if (!isValidMove(move, board)) return false;
+        if(move.desiredPosition.samePosition(move.piece.position)) return false
+        
+        updatePossibleMoves();
+        
+        const rowOffset = move.piece.type === PieceType.PAWN && isEnPassantMove(move, board.pieces)
+            ? -1 : 0;
 
         board.updateBoardOnMove(rowOffset, move);
-        setPieces(board.pieces);
+        
+        setBoard(previousBoard => {
+            return board.copy();
+        });
 
-        const promotionRow = move.piece.color === Color.WHITE ? 7 : 0;
-
-        if (move.desiredPosition.row === promotionRow && move.piece.isPawn) {
+        if (move.desiredPosition.row === 7 && move.piece.isPawn) {
             modalRef.current?.classList.remove('hidden');
             setPromotionPawn(move.piece);
         }
@@ -40,21 +52,31 @@ export const Referee = () => {
     const promotePawn = (type: PieceType) => {
         if (!promotionPawn) return;
 
-        board.pieces = board.pieces.reduce((results, piece) => {
-            if (piece.position.samePosition(promotionPawn.position))
-                piece = new Piece(piece.position, type, piece.color)
+        setBoard(previousBoard => {
+            board.pieces = board.pieces.reduce((results, piece) => {
+                if (piece.position.samePosition(promotionPawn.position))
+                    piece = new Piece(
+                        piece.position,
+                        type,
+                        piece.color,
+                        board.getValidMoves(piece),
+                        board.getAttackedSquares(piece)
+                    );
+    
+                results.push(piece);
+                return results;
+    
+            }, [] as Piece[])
 
-            results.push(piece);
-            return results;
+            return board.copy();
+        });
 
-        }, [] as Piece[])
-
-        setPieces(board.pieces)
         modalRef.current?.classList.add('hidden');
     }
 
     return (
         <>
+            <p>{board.turns}</p>
             <div id='pawn-promotion-modal' className='hidden' ref={modalRef}>
                 <div className='modal-body'>
                     <img
@@ -83,6 +105,7 @@ export const Referee = () => {
                 updatePossibleMoves={updatePossibleMoves}
                 playMove={playMove}
                 pieces={board.pieces}
+                flipBoard={flipBoard}
             />
         </>
     );

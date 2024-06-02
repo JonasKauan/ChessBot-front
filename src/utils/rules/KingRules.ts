@@ -1,4 +1,4 @@
-import { Position, Piece, Move } from '../../models';
+import { Position, Piece, Move, Board } from '../../models';
 import { Color, isTileThreatened, isValidMove } from '../constants';
 import { isTileOccupiedByFriendlyPiece } from './GeneralRules';
 
@@ -21,7 +21,7 @@ export const isKingMoveValid = (move: Move, board: Piece[]): boolean => {
     return validMovePattern && emptyOrOccupiedByEnemy && !threatenedSquare;
 }
 
-export const getPossibleKingMoves = (king: Piece, board: Piece[]): Position[] => {
+export const getPossibleKingMoves = (king: Piece, board: Board): Position[] => {
     return possibleKingMoves(king)
         .filter(move => isValidMove(move, board))
         .map(move => move.desiredPosition);
