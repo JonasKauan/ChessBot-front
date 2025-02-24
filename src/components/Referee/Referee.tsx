@@ -3,12 +3,25 @@ import { Color, PieceType, isValidMove, parseFenToBoard } from "../../utils/cons
 import { Chessboard } from "../Chessboard/Chessboard";
 import { Piece, Board, Move } from "../../models";
 import { isEnPassantMove } from '../../utils/rules/index'
+import { parseSanToMove } from '../../utils/board_helpers/SanParser'
+import { parseBoardToFenString } from '../../utils/board_helpers/FenParser'
 
 const INITIAL_POSITION_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+const BOT_URL = 'http://localhost/movimento'
 
-export const Referee = () => {
+interface Props {
+    jogandoContraIA: boolean
+}
+
+export const Referee = ({ jogandoContraIA }: Props) => {
     const [board, setBoard] = useState<Board>(parseFenToBoard(INITIAL_POSITION_FEN, 1));
     const [promotionPawn, setPromotionPawn] = useState<Piece>();
+
+    const [teste, setTeste] = useState<string>('');
+
+    const testarSan = () =>  {
+        console.log(parseSanToMove(teste, board))
+    }
 
     const modalRef = useRef<HTMLDivElement>(null);
 
@@ -19,6 +32,10 @@ export const Referee = () => {
     };
 
     const flipBoard = () => {
+        if(jogandoContraIA) {
+            return;
+        }
+
         board.flipBoard();
 
         setBoard(previousBoard => {
@@ -27,14 +44,11 @@ export const Referee = () => {
     }
 
     const playMove = (move: Move): boolean => {
-        if (!isValidMove(move, board)) return false;
+        if(!isValidMove(move, board)) return false;
         if(move.desiredPosition.samePosition(move.piece.position)) return false
-        
-        updatePossibleMoves();
-        
-        const rowOffset = move.piece.type === PieceType.PAWN && isEnPassantMove(move, board.pieces)
-            ? -1 : 0;
 
+        updatePossibleMoves();
+        const rowOffset = move.piece.type === PieceType.PAWN && isEnPassantMove(move, board.pieces) ? -1 : 0;
         board.updateBoardOnMove(rowOffset, move);
         
         setBoard(previousBoard => {
@@ -66,7 +80,7 @@ export const Referee = () => {
                 results.push(piece);
                 return results;
     
-            }, [] as Piece[])
+            }, [] as Piece[]);
 
             return board.copy();
         });
@@ -76,6 +90,8 @@ export const Referee = () => {
 
     return (
         <>
+            <input type="text" value={teste} onChange={(e) => setTeste(e.target.value)}/>
+            <button onClick={testarSan}>me xinga vai</button>
             <p>{board.turns}</p>
             <div id='pawn-promotion-modal' className='hidden' ref={modalRef}>
                 <div className='modal-body'>

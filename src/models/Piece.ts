@@ -48,6 +48,14 @@ export class Piece {
         return this.type === PieceType.KING
     }
 
+    canMoveToPosition(position: Position) {
+        for(const p of this.possibleMoves) {
+            if(p.samePosition(position)) return true;
+        }
+
+        return false;
+    }
+
     clone(): Piece {
         return new Piece(this.position, this.type, this.color, this.possibleMoves, this.attackedSquares);
     }

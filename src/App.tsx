@@ -2,9 +2,11 @@ import { Referee } from './components/Referee/Referee';
 import './App.css';
 
 function App() {
+  const jogandoContraIA = true
+
   return (
     <div className="app">
-      <Referee/>
+      <Referee jogandoContraIA={jogandoContraIA}/>
     </div>
   );
 }
