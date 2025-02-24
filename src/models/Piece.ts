@@ -48,6 +48,37 @@ export class Piece {
         return this.type === PieceType.KING
     }
 
+    get fenChar(): string {
+        let char;
+
+        switch(this.type) {
+            case PieceType.PAWN:
+                char = 'p';
+                break;
+            case PieceType.BISHOP:
+                char = 'b';
+                break;
+            case PieceType.KING:
+                char = 'k';
+                break;
+            case PieceType.KNIGHT:
+                char = 'n';
+                break;
+            case PieceType.QUEEN:
+                char = 'q';
+                break;
+            case PieceType.ROOK:
+                char = 'r';
+                break;
+        }
+
+        if(this.color === Color.WHITE) {
+            return char.toUpperCase();
+        }
+
+        return char;
+    }
+
     canMoveToPosition(position: Position) {
         for(const p of this.possibleMoves) {
             if(p.samePosition(position)) return true;

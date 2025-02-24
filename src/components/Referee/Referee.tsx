@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { Color, PieceType, isValidMove, parseFenToBoard } from "../../utils/constants";
+import { Color, PieceType, isValidMove } from "../../utils/constants";
 import { Chessboard } from "../Chessboard/Chessboard";
 import { Piece, Board, Move } from "../../models";
 import { isEnPassantMove } from '../../utils/rules/index'
 import { parseSanToMove } from '../../utils/board_helpers/SanParser'
-import { parseBoardToFenString } from '../../utils/board_helpers/FenParser'
+import { parseFenToBoard } from '../../utils/board_helpers/FenParser'
 
 const INITIAL_POSITION_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 const BOT_URL = 'http://localhost/movimento'
@@ -60,6 +60,7 @@ export const Referee = ({ jogandoContraIA }: Props) => {
             setPromotionPawn(move.piece);
         }
 
+        console.log(board.toFenString())
         return true;
     }
 
@@ -90,8 +91,8 @@ export const Referee = ({ jogandoContraIA }: Props) => {
 
     return (
         <>
-            <input type="text" value={teste} onChange={(e) => setTeste(e.target.value)}/>
-            <button onClick={testarSan}>me xinga vai</button>
+            {/* <input type="text" value={teste} onChange={(e) => setTeste(e.target.value)}/>
+            <button onClick={testarSan}>me xinga vai</button> */}
             <p>{board.turns}</p>
             <div id='pawn-promotion-modal' className='hidden' ref={modalRef}>
                 <div className='modal-body'>

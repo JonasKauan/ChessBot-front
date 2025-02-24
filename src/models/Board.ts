@@ -92,14 +92,42 @@ export class Board {
 
     toFenString() {
         let fenString = '';
+        let emptySquares = 0;
 
-        for (let i = 7; i >= 0; i--) {
-            for (let j = 0; j < 8; j++) {
+        for(let i = 7; i >= 0; i--) {
+            for(let j = 0; j < 8; j++) {
+                const piece = this.getPieceOnGivenPosition(new Position(j, i));
 
+                if(!piece) {
+                    emptySquares++;
+                    continue;
+                }
+
+                if(emptySquares !== 0) {
+                    fenString += emptySquares;
+                    emptySquares = 0;
+                }
+
+                fenString += piece.fenChar;
             }
+
+            if(emptySquares !== 0) {
+                fenString += emptySquares;
+                emptySquares = 0;
+            }
+
+            if(i > 0) fenString += '/'
         }
 
+        fenString += ' ' + this.currentColorToMove + ' ';
+
+        // adicionar  direitos de rocar
+
         return fenString;
+    }
+
+    getPieceOnGivenPosition(position: Position): Piece | undefined {
+        return this.pieces.find(piece => piece.position.samePosition(position));
     }
 
     copy(): Board {
